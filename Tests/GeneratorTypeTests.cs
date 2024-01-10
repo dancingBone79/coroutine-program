@@ -11,7 +11,7 @@ namespace GeneratorCalculation.Tests
 		[Fact()]
 		public void CheckTest()
 		{
-			GeneratorType g = new GeneratorType(new ListType(new SequenceType((PaperVariable)"x", (PaperVariable)"z"), new FunctionType("min", (PaperVariable)"n", (PaperVariable)"m")),
+			CoroutineInstanceType g = new CoroutineInstanceType(new ListType(new SequenceType((PaperVariable)"x", (PaperVariable)"z"), new FunctionType("min", (PaperVariable)"n", (PaperVariable)"m")),
 				new SequenceType(new ListType((PaperVariable)"x", (PaperVariable)"n"), new ListType((PaperVariable)"y", (PaperVariable)"m")));
 
 
@@ -23,9 +23,9 @@ namespace GeneratorCalculation.Tests
 		{
 			var forbiddenBindings = new Dictionary<SequenceType, List<SequenceType>>();
 			forbiddenBindings[new SequenceType((PaperVariable)"b")] = new List<SequenceType> { new SequenceType((ConcreteType)"B") };
-			GeneratorType g = new GeneratorType(forbiddenBindings, new SequenceType((PaperVariable)"a", (PaperVariable)"b"), (ConcreteType)"X");
+			CoroutineInstanceType g = new CoroutineInstanceType(forbiddenBindings, new SequenceType((PaperVariable)"a", (PaperVariable)"b"), (ConcreteType)"X");
 
-			GeneratorType ng;
+			CoroutineInstanceType ng;
 			var conditions = g.RunReceive((ConcreteType)"A", out ng);
 			Assert.True(conditions != null, "The coroutine should have no problem in receiving A.");
 
@@ -35,7 +35,7 @@ namespace GeneratorCalculation.Tests
 		[Fact]
 		public void TestConstructor()
 		{
-			var g = new CoroutineType(condition: new InheritanceCondition(),
+			var g = new CoroutineInstanceType(condition: new InheritanceCondition(),
 				receive: (ConcreteType)"A",
 				yield: (ConcreteType)"B");
 

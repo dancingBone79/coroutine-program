@@ -28,8 +28,8 @@ namespace RequirementAnalysis.Tests
 			var inheritance = REModelStart.GetObjectInheritance(content);
 			var generators = REModelStart.GetAllGenerators(content, inheritance);
 
-			generators.Add(new Generator("inputCard", new CoroutineType(ConcreteType.Void, new SequenceType("CardIDValidated", "InputCard"))));
-			generators.Add(new Generator("inputPassword", new CoroutineType(new SequenceType("CardIDValidated", "InputCard"), new SequenceType("CardIDValidated", "InputCard", "PasswordValidated"))));
+			generators.Add(new Generator("inputCard", new CoroutineInstanceType(ConcreteType.Void, new SequenceType("CardIDValidated", "InputCard"))));
+			generators.Add(new Generator("inputPassword", new CoroutineInstanceType(new SequenceType("CardIDValidated", "InputCard"), new SequenceType("CardIDValidated", "InputCard", "PasswordValidated"))));
 
 			string[] interestedCoroutines =
 			{
@@ -50,7 +50,7 @@ namespace RequirementAnalysis.Tests
 
 			var coroutines = new List<Generator>();
 
-			coroutines.Add(new Generator("", new GeneratorType(new TupleType(from b in bindings select b.Key), ConcreteType.Void)));
+			coroutines.Add(new Generator("", new CoroutineInstanceType(new TupleType(from b in bindings select b.Key), ConcreteType.Void)));
 			//coroutines.AddRange(generators.Where(g => Array.IndexOf(lowPriorityCoroutines2111, g.Name) != -1));
 
 

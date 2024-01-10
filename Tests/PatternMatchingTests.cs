@@ -13,13 +13,13 @@ namespace GeneratorCalculation.Tests
 			var terminatorTrue = new ListType((ConcreteType)"T", PaperStar.Instance);
 			var terminatorFalse = new ListType((ConcreteType)"F", PaperStar.Instance);
 
-			var falseG = new GeneratorType(new Dictionary<SequenceType, List<SequenceType>>
+			var falseG = new CoroutineInstanceType(new Dictionary<SequenceType, List<SequenceType>>
 				{
 					[new SequenceType((PaperVariable)"x")] = new List<SequenceType> { new SequenceType((PaperVariable)"y") }
 				},
 				new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"y")), ConcreteType.Void);
-			var trueG = new GeneratorType(terminatorTrue, new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"x")));
-			var rec = new GeneratorType(
+			var trueG = new CoroutineInstanceType(new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"x")), terminatorTrue);
+			var rec = new CoroutineInstanceType(
 				new Dictionary<SequenceType, List<SequenceType>>
 				{
 					//Use a "D"ummy type because (PaperInt)0 is not a PaperType.
@@ -30,7 +30,7 @@ namespace GeneratorCalculation.Tests
 
 			List<Generator> coroutines = new List<Generator>();
 
-			coroutines.Add(new Generator("base", new GeneratorType(terminatorFalse, new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperInt)0))))));
+			coroutines.Add(new Generator("base", new CoroutineInstanceType(new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperInt)0))), terminatorFalse)));
 			coroutines.Add(new Generator("recursion1", true, rec.Clone()));
 			coroutines.Add(new Generator("recursion2", true, rec.Clone()));
 
@@ -41,13 +41,13 @@ namespace GeneratorCalculation.Tests
 		{
 			var terminatorTrue = new ListType((ConcreteType)"T", PaperStar.Instance);
 			var terminatorFalse = new ListType((ConcreteType)"F", PaperStar.Instance);
-			var falseG = new GeneratorType(new Dictionary<SequenceType, List<SequenceType>>
+			var falseG = new CoroutineInstanceType(new Dictionary<SequenceType, List<SequenceType>>
 				{
 					[new SequenceType((PaperVariable)"x")] = new List<SequenceType> { new SequenceType((PaperVariable)"y") }
 				},
 				new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"y")), ConcreteType.Void);
-			var trueG = new GeneratorType(terminatorTrue, new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"x")));
-			var rec = new GeneratorType(
+			var trueG = new CoroutineInstanceType(new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"x")), terminatorTrue);
+			var rec = new CoroutineInstanceType(
 				new Dictionary<SequenceType, List<SequenceType>>
 				{
 					//Use a "D"ummy type because (PaperInt)0 is not a PaperType.
@@ -58,7 +58,7 @@ namespace GeneratorCalculation.Tests
 
 			List<Generator> coroutines = new List<Generator>();
 
-			coroutines.Add(new Generator("base", new GeneratorType(terminatorFalse, new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperInt)0))))));
+			coroutines.Add(new Generator("base", new CoroutineInstanceType(new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperInt)0))), terminatorFalse)));
 			coroutines.Add(new Generator("recursion1", true, rec.Clone()));
 			coroutines.Add(new Generator("recursion2", true, rec.Clone()));
 
@@ -69,7 +69,7 @@ namespace GeneratorCalculation.Tests
 		public void TrueTest()
 		{
 			List<Generator> coroutines = GetRules();
-			coroutines.Add(new Generator("starter", new GeneratorType(new SequenceType(new TupleType((ConcreteType)"String", new ListType((ConcreteType)"String", (PaperInt)3))), ConcreteType.Void)));
+			coroutines.Add(new Generator("starter", new CoroutineInstanceType(ConcreteType.Void, new SequenceType(new TupleType((ConcreteType)"String", new ListType((ConcreteType)"String", (PaperInt)3))))));
 
 			try
 			{
@@ -88,7 +88,7 @@ namespace GeneratorCalculation.Tests
 		public void FalseTest()
 		{
 			List<Generator> coroutines = GetRules();
-			coroutines.Add(new Generator("starter", new GeneratorType(new SequenceType(new TupleType((ConcreteType)"Path", new ListType((ConcreteType)"String", (PaperInt)3))), ConcreteType.Void)));
+			coroutines.Add(new Generator("starter", new CoroutineInstanceType(ConcreteType.Void, new SequenceType(new TupleType((ConcreteType)"Path", new ListType((ConcreteType)"String", (PaperInt)3))))));
 
 			try
 			{
@@ -107,7 +107,7 @@ namespace GeneratorCalculation.Tests
 		public void SelfCleaningTrueTest()
 		{
 			List<Generator> coroutines = GetSelfCleaningRules();
-			coroutines.Add(new Generator("starter", new GeneratorType(new SequenceType(new TupleType((ConcreteType)"String", new ListType((ConcreteType)"String", (PaperInt)3))), ConcreteType.Void)));
+			coroutines.Add(new Generator("starter", new CoroutineInstanceType(ConcreteType.Void, new SequenceType(new TupleType((ConcreteType)"String", new ListType((ConcreteType)"String", (PaperInt)3))))));
 
 			try
 			{
@@ -117,6 +117,7 @@ namespace GeneratorCalculation.Tests
 			{
 				Assert.True(e.YieldsToOutside.Count > 0);
 				Assert.True(e.YieldsToOutside[0] is ListType);
+				Assert.IsType<ListType>(e.YieldsToOutside[0]);
 				Assert.Equal((ConcreteType)"T", ((ListType)e.YieldsToOutside[0]).Type);
 			}
 		}
@@ -126,7 +127,7 @@ namespace GeneratorCalculation.Tests
 		public void SelfCleaningFalseTest()
 		{
 			List<Generator> coroutines = GetSelfCleaningRules();
-			coroutines.Add(new Generator("starter", new GeneratorType(new SequenceType(new TupleType((ConcreteType)"Path", new ListType((ConcreteType)"String", (PaperInt)3))), ConcreteType.Void)));
+			coroutines.Add(new Generator("starter", new CoroutineInstanceType(ConcreteType.Void, new SequenceType(new TupleType((ConcreteType)"Path", new ListType((ConcreteType)"String", (PaperInt)3))))));
 
 			try
 			{

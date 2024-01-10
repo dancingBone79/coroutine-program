@@ -10,8 +10,8 @@ namespace GeneratorCalculation
 	public class Solver
 	{
 		private static readonly ILogger logger = ApplicationLogging.LoggerFactory.CreateLogger(nameof(Solver));
-		
-		private readonly List<GeneratorType> compositionOrder = new List<GeneratorType>();
+
+		private readonly List<CoroutineInstanceType> compositionOrder = new List<CoroutineInstanceType>();
 
 		public static Dictionary<PaperVariable, PaperWord> JoinConditions(List<Dictionary<PaperVariable, PaperWord>> conditions)
 		{
@@ -99,7 +99,7 @@ namespace GeneratorCalculation
 			return availableConstants.ToList();
 		}
 
-		public GeneratorType SolveWithBindings(List<Generator> coroutines, Dictionary<PaperVariable, PaperWord> bindings = null, int steps = 500)
+		public CoroutineInstanceType SolveWithBindings(List<Generator> coroutines, Dictionary<PaperVariable, PaperWord> bindings = null, int steps = 500)
 		{
 			if (bindings == null)
 				bindings = new Dictionary<PaperVariable, PaperWord>();
@@ -151,7 +151,7 @@ namespace GeneratorCalculation
 
 			Console.WriteLine("\nComposition order:\n" + string.Join(" ->\n", compositionOrder.Select(g =>
 			{
-				if (g is CoroutineType cg)
+				if (g is CoroutineInstanceType cg)
 					return string.IsNullOrEmpty(cg.Source?.Name) ? g.ToString() : cg.Source.Name;
 				else
 					return g.ToString();
@@ -188,7 +188,7 @@ namespace GeneratorCalculation
 		}
 
 
-		GeneratorType Solve(List<Generator> pairs, Dictionary<PaperVariable, PaperWord> constants, int steps)
+		CoroutineInstanceType Solve(List<Generator> pairs, Dictionary<PaperVariable, PaperWord> constants, int steps)
 		{
 			//find a generator type where the next type is not void.
 			Console.WriteLine();
@@ -213,7 +213,7 @@ namespace GeneratorCalculation
 
 			var yields = new SequenceType(yieldsToOutside).Normalize();
 
-			var result = new GeneratorType(yields, receive);
+			var result = new CoroutineInstanceType(receive, yields);
 			return result;
 		}
 
@@ -253,7 +253,7 @@ namespace GeneratorCalculation
 				PaperType yieldedType = null;
 
 				Console.Write($"{pairs[i].Name}:\t{coroutine} ");
-				GeneratorType g = coroutine.RunYield(bindings, ref yieldedType);
+				CoroutineInstanceType g = coroutine.RunYield(bindings, ref yieldedType);
 				if (g != null)
 				{
 					Debug.Assert(coroutine.Receive == ConcreteType.Void);
@@ -279,11 +279,11 @@ namespace GeneratorCalculation
 
 					if (yieldedType is TupleType tTuple)
 					{
-						if (tTuple.Types.All(t => t is GeneratorType))
+						if (tTuple.Types.All(t => t is CoroutineInstanceType))
 						{
 							try
 							{
-								yieldedType = SolveWithBindings(tTuple.Types.Select(t => new Generator("", (GeneratorType)t)).ToList(), bindings);
+								yieldedType = SolveWithBindings(tTuple.Types.Select(t => new Generator("", (CoroutineInstanceType)t)).ToList(), bindings);
 							}
 							catch (DeadLockException e)
 							{
@@ -295,9 +295,9 @@ namespace GeneratorCalculation
 					}
 
 
-					if (yieldedType is GeneratorType)
+					if (yieldedType is CoroutineInstanceType)
 					{
-						pairs.Insert(i + 1, new Generator("", (GeneratorType)yieldedType));
+						pairs.Insert(i + 1, new Generator("", (CoroutineInstanceType)yieldedType));
 					}
 					else if (yieldedType is SequenceType ys)
 					{
@@ -352,7 +352,7 @@ namespace GeneratorCalculation
 
 				for (int j = 0; j < pairs.Count; j++)
 				{
-					Debug.Assert(pendingType is GeneratorType == false);
+					Debug.Assert(pendingType is CoroutineInstanceType == false);
 
 
 					var receiverIndex = Receive(pendingType, pairs, 0);
@@ -400,11 +400,11 @@ namespace GeneratorCalculation
 				PaperType remaining = null;
 				pairs[i].Type.Receive.Pop(ref head, ref remaining);
 
-				if (head is GeneratorType)
+				if (head is CoroutineInstanceType)
 					throw new NotImplementedException();
 				else if (head is ListType l)
 				{
-					if (l.Type is GeneratorType receiveG)
+					if (l.Type is CoroutineInstanceType receiveG)
 					{
 						Dictionary<PaperVariable, PaperWord> conditions = new Dictionary<PaperVariable, PaperWord>();
 						List<int> matches = new List<int>();
@@ -445,7 +445,7 @@ namespace GeneratorCalculation
 							try
 							{
 								//pairs[i].Type.Receive.Pop
-								pairs[i].Type = new GeneratorType(pairs[i].Type.ForbiddenBindings, remaining, pairs[i].Type.Yield).ApplyEquation(conditions.ToList());
+								pairs[i].Type = (CoroutineInstanceType)new CoroutineInstanceType(pairs[i].Type.ForbiddenBindings, remaining, pairs[i].Type.Yield).ApplyEquation(conditions.ToList());
 								Console.Write($"{pairs[i].Name} becomes {pairs[i].Type}");
 								if (conditions.Count > 0)
 								{
@@ -489,7 +489,7 @@ namespace GeneratorCalculation
 			for (var i = 0; i < pairs.Count; i++)
 			{
 				var coroutine = pairs[(i + startIndex) % pairs.Count].Type;
-				GeneratorType newGenerator;
+				CoroutineInstanceType newGenerator;
 				Dictionary<PaperVariable, PaperWord> conditions = coroutine.RunReceive(pendingType, out newGenerator);
 				if (conditions != null)
 				{
@@ -555,12 +555,12 @@ namespace GeneratorCalculation
 			return null;
 		}
 
-		static GeneratorType CheckReceive(PaperType pendingType, List<Generator> pairs, int start)
+		static CoroutineInstanceType CheckReceive(PaperType pendingType, List<Generator> pairs, int start)
 		{
 			for (int i = start; i < pairs.Count; i++)
 			{
 				var coroutine = pairs[i].Type;
-				GeneratorType newGenerator;
+				CoroutineInstanceType newGenerator;
 				Dictionary<PaperVariable, PaperWord> conditions = coroutine.RunReceive(pendingType, out newGenerator);
 				if (conditions != null)
 					return coroutine;
