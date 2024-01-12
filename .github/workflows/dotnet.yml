@@ -11,6 +11,27 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 3.1.x
+      - name: count program lines
+        run: |
+            totalFilesLines=0
+            shopt -s globstar
+            for file in ./**
+            do
+                if [ -d $file ];then
+                  continue
+                fi
+                if [[ "$file" == */generated/* ]]; then
+                  continue
+                fi
+                if [[ "$file" == *.jar ]]; then
+                  continue
+                fi
+                fileLines=`grep -c '' $file`
+                echo "fileName = $file"
+                echo "linesCount = $fileLines"
+                let totalFilesLines=$fileLines+$totalFilesLines
+            done
+            echo "totalFilesLines = $totalFilesLines"
       - name: Install dependencies
         run: dotnet restore
       - name: Build
