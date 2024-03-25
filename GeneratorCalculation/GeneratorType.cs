@@ -66,7 +66,7 @@ namespace GeneratorCalculation
 					yieldedType = (PaperType)yieldedType.ApplyEquation(bindings.ToList());
 					//Forbidden bindings are not needed when the coroutine starts to yield
 					//because all variables have been bound.
-					return new CoroutineInstanceType(Receive, remaining);
+					return new CoroutineInstanceType(Receive, remaining, this.Source);
 				}
 			}
 			else
@@ -133,7 +133,7 @@ namespace GeneratorCalculation
 				if (HasForbiddenBindings(conditions))
 					return null;
 
-				newGenerator = new CoroutineInstanceType(ForbiddenBindings, remaining, Yield);
+				newGenerator = new CoroutineInstanceType(ForbiddenBindings, remaining, Yield, Source);
 				return conditions;
 			}
 

@@ -445,7 +445,7 @@ namespace GeneratorCalculation
 							try
 							{
 								//pairs[i].Type.Receive.Pop
-								pairs[i].Type = (CoroutineInstanceType)new CoroutineInstanceType(pairs[i].Type.ForbiddenBindings, remaining, pairs[i].Type.Yield).ApplyEquation(conditions.ToList());
+								pairs[i].Type = (CoroutineInstanceType)new CoroutineInstanceType(pairs[i].Type.ForbiddenBindings, remaining, pairs[i].Type.Yield, pairs[i].Type.Source).ApplyEquation(conditions.ToList());
 								Console.Write($"{pairs[i].Name} becomes {pairs[i].Type}");
 								if (conditions.Count > 0)
 								{

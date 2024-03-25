@@ -145,6 +145,8 @@ namespace GeneratorCalculation
 				return this;
 			else if (eq.Value == null) // null denotes a constant.
 				return this;
+			else if (eq.Value is CoroutineInstanceType)
+				return new CoroutineInstanceType(((CoroutineInstanceType)eq.Value).Receive, ((CoroutineInstanceType)eq.Value).Yield, this);
 			else
 				return eq.Value;
 		}
