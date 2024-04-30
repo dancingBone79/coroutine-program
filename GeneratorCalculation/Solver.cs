@@ -9,9 +9,10 @@ namespace GeneratorCalculation
 {
 	public class Solver
 	{
-		private static readonly ILogger logger = ApplicationLogging.LoggerFactory.CreateLogger(nameof(Solver));
+		public event EventHandler<CompositionEventArgs> YieldEvent;
+		public event EventHandler<CompositionEventArgs> ResumeEvent;
 
-		private readonly List<CoroutineInstanceType> compositionOrder = new List<CoroutineInstanceType>();
+		private static readonly ILogger logger = ApplicationLogging.LoggerFactory.CreateLogger(nameof(Solver));
 
 		public static Dictionary<PaperVariable, PaperWord> JoinConditions(List<Dictionary<PaperVariable, PaperWord>> conditions)
 		{
@@ -149,14 +150,6 @@ namespace GeneratorCalculation
 
 			var result = Solve(coroutines, bindings, steps);
 
-			Console.WriteLine("\nComposition order:\n" + string.Join(" ->\n", compositionOrder.Select(g =>
-			{
-				if (g is CoroutineInstanceType cg)
-					return string.IsNullOrEmpty(cg.Source?.Name) ? g.ToString() : cg.Source.Name;
-				else
-					return g.ToString();
-			})));
-
 			return result;
 		}
 
@@ -258,6 +251,8 @@ namespace GeneratorCalculation
 				{
 					Debug.Assert(coroutine.Receive == ConcreteType.Void);
 
+					YieldEvent?.Invoke(this, new CompositionEventArgs { ProcessedCoroutine = pairs[i].Type });
+					
 
 					//var g2 = CheckYield(pairs, constants, i + 1);
 					//if (g2 != null)
@@ -269,7 +264,6 @@ namespace GeneratorCalculation
 
 					//yieldedType = yieldedType.Normalize();
 
-					compositionOrder.Add(pairs[i].Type);
 					Console.WriteLine($"--> {g}, yielded: {yieldedType}");
 
 					canWrap = true;
@@ -308,7 +302,7 @@ namespace GeneratorCalculation
 						var receiverIndex = Receive(yieldedType, pairs, i);
 						if (receiverIndex != null)
 						{
-							compositionOrder.Add(pairs[receiverIndex.Value].Type);
+							ResumeEvent?.Invoke(this, new CompositionEventArgs { ProcessedCoroutine = pairs[receiverIndex.Value].Type });
 
 							i = receiverIndex.Value;
 						}
@@ -583,8 +577,11 @@ namespace GeneratorCalculation
 			this.LockedGenerators = new List<Generator>(lockedGenerators);
 			this.YieldsToOutside = yieldsToOutside;
 		}
+	}
 
-
+	public class CompositionEventArgs : EventArgs
+	{
+		public CoroutineInstanceType ProcessedCoroutine { get; set; }
 	}
 
 	public class StepLimitExceededException : Exception
