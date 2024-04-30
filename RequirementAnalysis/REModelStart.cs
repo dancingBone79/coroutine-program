@@ -11,11 +11,32 @@ namespace RequirementAnalysis
 {
 	public class REModelStart
 	{
+		static string ExtractParenthesesContent(string input)
+		{
+			// 提取括号及其内容的函数
+			// 查找第一个左括号的索引
+			int leftParenthesesIndex = input.IndexOf('(');
+			if (leftParenthesesIndex == -1)
+			{
+				throw new Exception("Left parentheses not found.");
+			}
+
+			// 查找第一个右括号的索引
+			int rightParenthesesIndex = input.IndexOf(')');
+			if (rightParenthesesIndex == -1)
+			{
+				throw new Exception("Right parentheses not found.");
+			}
+
+			// 提取括号及其内容
+			string content = input.Substring(leftParenthesesIndex, rightParenthesesIndex - leftParenthesesIndex + 1);
+			return content;
+		}
 		static void Main(string[] args)
 		{
 
 			// Step 1: Load the file content into a string.
-			string path = @"D:\rm2pt\CaseStudies\CoCoME\RequirementsModel\cocome.remodel";
+			string path = @"C:\Users\p2215981\Desktop\Liu.Lixue\coroutine-program\RequirementAnalysisTests\cocome.remodel";
 
 			string[] interestedCoroutines =
 			{
@@ -44,7 +65,7 @@ namespace RequirementAnalysis
 				Console.WriteLine($"{g.Name}:\t{g.Type}");
 
 			Console.WriteLine("\nNow, let's compose interested coroutines.");
-			CoroutineInstanceType result = Compose(generators, interestedCoroutines, lowPriorityCoroutines);
+			CoroutineInstanceType result = Compose(path, generators, interestedCoroutines, lowPriorityCoroutines);
 			Console.WriteLine(result);
 		}
 
@@ -57,7 +78,7 @@ namespace RequirementAnalysis
 			return GetAllGenerators(content, inheritance);
 		}
 
-		public static CoroutineInstanceType Compose(List<Generator> generators, string[] interestedCoroutines = null, string[] lowPriorityCoroutines = null)
+		public static CoroutineInstanceType Compose(string filePath, List<Generator> generators, string[] interestedCoroutines = null, string[] lowPriorityCoroutines = null)
 		{
 			List<Generator> filtered;
 			if (interestedCoroutines != null)
@@ -75,8 +96,66 @@ namespace RequirementAnalysis
 			if (lowPriorityCoroutines != null)
 				coroutines.AddRange(generators.Where(g => Array.IndexOf(lowPriorityCoroutines, g.Name) != -1));
 
+			List<CoroutineInstanceType> compositionOrder = new List<CoroutineInstanceType>();
+			var solver = new Solver();
+			solver.YieldEvent += (object sender, CompositionEventArgs e) =>
+			{
+				compositionOrder.Add(e.ProcessedCoroutine);
+			};
+			solver.ResumeEvent += (object sender, CompositionEventArgs e) =>
+			{
+				compositionOrder.Add(e.ProcessedCoroutine);
+			};
 
-			return new Solver().SolveWithBindings(coroutines, bindings);
+			var result = solver.SolveWithBindings(coroutines, bindings);
+
+
+			//store function names
+			List<string> modifiedValues = new List<string>();
+
+			Console.WriteLine("------Composition order:\n" + string.Join(" ---->\n", compositionOrder.Select(g =>
+			{
+				string p;
+				if (g is CoroutineInstanceType cg)
+				{
+					p = string.IsNullOrEmpty(cg.Source?.Name) ? g.ToString() : cg.Source.Name;
+				}
+				else
+				{
+					p = g.ToString();
+				}
+
+				if (p.Split("::").Length == 2)
+				{
+					// 将 p 的值写入到文件中，且去重
+					if (!modifiedValues.Contains(p))
+					{
+						string modifiedValue = p;
+						modifiedValues.Add(modifiedValue);
+					}
+				}
+				return p;
+			})));
+
+			foreach (var value in modifiedValues)
+			{
+				Console.WriteLine(value);
+
+				string[] lines = File.ReadAllLines(filePath);
+
+				for (int i = 0; i < lines.Length; i++)
+				{
+					if (lines[i].Contains(value))
+					{
+						Console.WriteLine($"Field '{value}' found in line {i + 1}: {lines[i]}");
+
+						string content = ExtractParenthesesContent(lines[i]);
+						Console.WriteLine("^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + value + content);
+					}
+				}
+			}
+
+			return result;
 		}
 
 		/// <summary>
