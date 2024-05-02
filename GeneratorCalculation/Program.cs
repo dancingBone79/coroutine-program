@@ -14,8 +14,8 @@ namespace GeneratorCalculation
 			{
 				[new SequenceType((PaperVariable)"x")] = new List<SequenceType> { new SequenceType((PaperVariable)"y") }
 			},
-				new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"y")), ConcreteType.Void);
-			var trueG = new CoroutineInstanceType(terminatorTrue, new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"x")));
+				new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"y")), ConcreteType.Void, null);
+			var trueG = new CoroutineInstanceType(terminatorTrue, new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"x")), null);
 			var rec = new CoroutineInstanceType(
 				new Dictionary<SequenceType, List<SequenceType>>
 				{
@@ -23,11 +23,11 @@ namespace GeneratorCalculation
 					[new SequenceType(new ListType((ConcreteType)"D", (PaperVariable)"n"))] = new List<SequenceType> { new SequenceType(new ListType((ConcreteType)"D", (PaperInt)0)) }
 				},
 				receive: new SequenceType(new ListType(falseG, PaperStar.Instance), new ListType(trueG, PaperStar.Instance), new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperVariable)"n"))),
-				yield: new SequenceType(falseG, trueG, new TupleType((PaperVariable)"x", (PaperVariable)"y"), new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", new DecFunction((PaperVariable)"n")))));
+				yield: new SequenceType(falseG, trueG, new TupleType((PaperVariable)"x", (PaperVariable)"y"), new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", new DecFunction((PaperVariable)"n")))), null);
 
 			List<Generator> coroutines = new List<Generator>();
 
-			coroutines.Add(new Generator("base", new CoroutineInstanceType(new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperInt)0))), terminatorFalse)));
+			coroutines.Add(new Generator("base", new CoroutineInstanceType(new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperInt)0))), terminatorFalse, null)));
 			coroutines.Add(new Generator("recursion1", true, rec.Clone()));
 			coroutines.Add(new Generator("recursion2", true, rec.Clone()));
 
@@ -41,17 +41,17 @@ namespace GeneratorCalculation
 
 			var falseG = new CoroutineInstanceType(
 				receive: new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"y")),
-				yield: ConcreteType.Void);
-			var trueG = new CoroutineInstanceType(terminatorTrue, new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"x")));
+				yield: ConcreteType.Void, null);
+			var trueG = new CoroutineInstanceType(terminatorTrue, new SequenceType(new TupleType((PaperVariable)"x", (PaperVariable)"x")), null);
 			var rec = new CoroutineInstanceType(
 				receive: new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperVariable)"n"))),
-				yield: new SequenceType(trueG, falseG, new TupleType((PaperVariable)"x", (PaperVariable)"y"), new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", new DecFunction((PaperVariable)"n")))));
+				yield: new SequenceType(trueG, falseG, new TupleType((PaperVariable)"x", (PaperVariable)"y"), new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", new DecFunction((PaperVariable)"n")))), null);
 
 			List<Generator> coroutines = new List<Generator>();
 
 			coroutines.Add(new Generator("recursion1", true, rec.Clone()));
 			coroutines.Add(new Generator("recursion2", true, rec.Clone()));
-			coroutines.Add(new Generator("base", new CoroutineInstanceType(terminatorFalse, new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperInt)0))))));
+			coroutines.Add(new Generator("base", new CoroutineInstanceType(terminatorFalse, new SequenceType(new TupleType((PaperVariable)"x", new ListType((PaperVariable)"y", (PaperInt)0))), null)));
 
 			return coroutines;
 		}
@@ -61,7 +61,7 @@ namespace GeneratorCalculation
 
 
 			List<Generator> coroutines = GetSelfCleaningRules();
-			coroutines.Add(new Generator("starter", new CoroutineInstanceType(ConcreteType.Void, new SequenceType(new TupleType((ConcreteType)"String", new ListType((ConcreteType)"String", (PaperInt)3))))));
+			coroutines.Add(new Generator("starter", new CoroutineInstanceType(ConcreteType.Void, new SequenceType(new TupleType((ConcreteType)"String", new ListType((ConcreteType)"String", (PaperInt)3))), null)));
 
 			var result = new Solver().SolveWithBindings(coroutines);
 			

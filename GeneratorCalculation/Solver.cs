@@ -190,6 +190,7 @@ namespace GeneratorCalculation
 
 
 			//allow at most one coroutine to have receive.
+			// CR6
 			var lockedCoroutines = pairs.Where(p => p.Type.Receive != ConcreteType.Void).ToList();
 			if (lockedCoroutines.Count > 1)
 				throw new DeadLockException(yieldsToOutside, lockedCoroutines);
@@ -206,10 +207,18 @@ namespace GeneratorCalculation
 
 			var yields = new SequenceType(yieldsToOutside).Normalize();
 
-			var result = new CoroutineInstanceType(receive, yields);
+			var result = new CoroutineInstanceType(receive, yields, null);
 			return result;
 		}
 
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="pairs">Theta</param>
+		/// <param name="bindings"></param>
+		/// <param name="steps"></param>
+		/// <returns></returns>
+		/// <exception cref="StepLimitExceededException"></exception>
 		private List<PaperType> SolveWithinSteps(List<Generator> pairs, Dictionary<PaperVariable, PaperWord> bindings, int steps)
 		{
 			List<PaperType> yieldsToOutside = new List<PaperType>();
@@ -246,6 +255,7 @@ namespace GeneratorCalculation
 				PaperType yieldedType = null;
 
 				Console.Write($"{pairs[i].Name}:\t{coroutine} ");
+				Console.Write($"\n---{pairs[i].Type.Source}:\t{coroutine} ");
 				CoroutineInstanceType g = coroutine.RunYield(bindings, ref yieldedType);
 				if (g != null)
 				{
@@ -292,14 +302,18 @@ namespace GeneratorCalculation
 
 					if (yieldedType is CoroutineInstanceType)
 					{
+						//CR5
 						pairs.Insert(i + 1, new Generator("", (CoroutineInstanceType)yieldedType));
 					}
 					else if (yieldedType is SequenceType ys)
 					{
+						//maybe 
 						yieldsToOutside.AddRange(ys.Types);
 					}
 					else
 					{
+						//yieldtype = pendingtype
+						// CR7
 						var receiverIndex = Receive(yieldedType, pairs, i);
 						if (receiverIndex != null)
 						{
@@ -309,7 +323,10 @@ namespace GeneratorCalculation
 						}
 						else
 						{
+							// CR8
 							logger.LogInformation($"Add to external yield: {yieldedType}");
+							//yieldtype = pendingtype
+							//yieldsToOutside = External Yield
 							yieldsToOutside.Add(yieldedType);
 							i = 0;
 						}
@@ -505,6 +522,7 @@ namespace GeneratorCalculation
 					}
 					else
 					{
+						//CR7
 						Console.Write(" on the conditions that ");
 						Console.WriteLine(string.Join(", ", conditions.Select(p => $"{p.Key}/{p.Value}")) + ".");
 

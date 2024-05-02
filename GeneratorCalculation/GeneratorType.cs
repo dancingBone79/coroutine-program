@@ -211,7 +211,7 @@ namespace GeneratorCalculation
 					SequenceType valuedKey = (SequenceType)key.ApplyEquation(equations);
 					var valuedSet = ForbiddenBindings[key].Select(s => (SequenceType)s.ApplyEquation(equations)).ToList();
 					if (valuedSet.Any(s => s.Equals(valuedKey)))
-						return new CoroutineInstanceType(ConcreteType.Void, ConcreteType.Void); // This identity element will be nuked.
+						return new CoroutineInstanceType(ConcreteType.Void, ConcreteType.Void, this.Source); // This identity element will be nuked.
 
 					var c = new List<string>();
 					if (valuedKey.GetVariables().Count == 0 && valuedSet.Sum(s => s.GetVariables().Count) == 0)
@@ -223,7 +223,7 @@ namespace GeneratorCalculation
 						copy[valuedKey] = valuedSet;
 				}
 
-				return new CoroutineInstanceType(copy, newReceiveType, newYieldType);
+				return new CoroutineInstanceType(copy, newReceiveType, newYieldType, this.Source);
 			}
 			else
 				return this;
@@ -244,11 +244,11 @@ namespace GeneratorCalculation
 		{
 			CoroutineInstanceType g;
 			if (Condition != null)
-				g = new CoroutineInstanceType(Condition, Receive.Normalize(), Yield.Normalize());
+				g = new CoroutineInstanceType(Condition, Receive.Normalize(), Yield.Normalize(), Source);
 			else if (ForbiddenBindings != null)
-				g = new CoroutineInstanceType(ForbiddenBindings, Receive.Normalize(), Yield.Normalize());
+				g = new CoroutineInstanceType(ForbiddenBindings, Receive.Normalize(), Yield.Normalize(), Source);
 			else
-				g = new CoroutineInstanceType(Receive.Normalize(), Yield.Normalize());
+				g = new CoroutineInstanceType(Receive.Normalize(), Yield.Normalize(), Source);
 
 			if (g.Yield == ConcreteType.Void && g.Receive == ConcreteType.Void)
 				return ConcreteType.Void;
@@ -374,7 +374,7 @@ namespace GeneratorCalculation
 
 		public CoroutineInstanceType Start()
 		{
-			return new CoroutineInstanceType(Receive, Yield);
+			return new CoroutineInstanceType(Receive, Yield, null);
 		}
 
 		public override string ToString()

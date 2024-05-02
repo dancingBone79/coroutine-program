@@ -36,27 +36,23 @@ namespace RequirementAnalysis
 		{
 
 			// Step 1: Load the file content into a string.
-			string path = @"C:\Users\p2215981\Desktop\Liu.Lixue\coroutine-program\RequirementAnalysisTests\cocome.remodel";
+			string path = @"C:\Users\p2215981\Desktop\Liu.Lixue\coroutine-program\RequirementAnalysisTests\library.remodel";
 
 			string[] interestedCoroutines =
 			{
-				"CoCoMESystem::openStore",
-				"CoCoMESystem::openCashDesk",
-				"ProcessSaleService::makeNewSale",
-				"ProcessSaleService::enterItem",
-				"ManageStoreCRUDService::createStore",
-				"ManageCashDeskCRUDService::createCashDesk",
-				"ManageItemCRUDService::createItem",
-
-				"ProcessSaleService::makeCashPayment",
-				//"ProcessSaleService::makeCardPayment",
+				"ManageBookCRUDService::createBook",
+				"ManageBookCopyCRUDService::addBookCopy",
+				"ManageUserCRUDService::createStudent",
+				"LibraryManagementSystemSystem::makeReservation",
+				"LibraryManagementSystemSystem::borrowBook",
+				"LibraryManagementSystemSystem::returnBook",
 
 			};
 			string[] lowPriorityCoroutines =
 			{
-				"ManageItemCRUDService::deleteItem",
-				"ManageStoreCRUDService::deleteStore",
-				"ManageCashDeskCRUDService::deleteCashDesk",
+				"ManageUserCRUDService::deleteUser",
+				"ManageBookCRUDService::deleteBook",
+				"ManageBookCopyCRUDService::deleteBookCopy",
 			};
 
 			List<Generator> generators = FindTypes(path);
@@ -94,7 +90,7 @@ namespace RequirementAnalysis
 
 			var coroutines = new List<Generator>();
 
-			coroutines.Add(new Generator("", new CoroutineInstanceType(ConcreteType.Void, new TupleType(from b in bindings select b.Key))));
+			coroutines.Add(new Generator("", new CoroutineInstanceType(ConcreteType.Void, new TupleType(from b in bindings select b.Key), null)));
 			if (lowPriorityCoroutines != null)
 				coroutines.AddRange(generators.Where(g => Array.IndexOf(lowPriorityCoroutines, g.Name) != -1));
 

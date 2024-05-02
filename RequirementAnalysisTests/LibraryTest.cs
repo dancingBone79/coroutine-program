@@ -55,7 +55,7 @@ namespace RequirementAnalysis.Tests
 
 			var coroutines = new List<Generator>();
 
-			coroutines.Add(new Generator("", new CoroutineInstanceType(ConcreteType.Void, new TupleType(from b in bindings select b.Key))));
+			coroutines.Add(new Generator("", new CoroutineInstanceType(ConcreteType.Void, new TupleType(from b in bindings select b.Key), null)));
 			coroutines.AddRange(generators.Where(g => Array.IndexOf(lowPriorityCoroutines, g.Name) != -1));
 
 
@@ -103,7 +103,7 @@ namespace RequirementAnalysis.Tests
 
 			var coroutines = new List<Generator>();
 
-			coroutines.Add(new Generator("", new CoroutineInstanceType(ConcreteType.Void, new TupleType(from b in bindings select b.Key))));
+			coroutines.Add(new Generator("", new CoroutineInstanceType(ConcreteType.Void, new TupleType(from b in bindings select b.Key), null)));
 
 
 			var result = new Solver().SolveWithBindings(coroutines, bindings);
