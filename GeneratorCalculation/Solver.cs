@@ -249,6 +249,7 @@ namespace GeneratorCalculation
 				CoroutineInstanceType g = coroutine.RunYield(bindings, ref yieldedType);
 				if (g != null)
 				{
+					Debug.Assert(yieldedType != null);
 					Debug.Assert(coroutine.Receive == ConcreteType.Void);
 
 					YieldEvent?.Invoke(this, new CompositionEventArgs { ProcessedCoroutine = pairs[i].Type });
