@@ -65,7 +65,9 @@ namespace RequirementAnalysis
 				Console.WriteLine($"{g.Name}:\t{g.Type}");
 
 			Console.WriteLine("\nNow, let's compose interested coroutines.");
-			CoroutineInstanceType result = Compose(path, generators, interestedCoroutines, lowPriorityCoroutines);
+			var reModelContent = File.ReadAllText(path);
+			List<string> funcO = new List<string>();
+			CoroutineInstanceType result = Compose(reModelContent, funcO, generators, interestedCoroutines, lowPriorityCoroutines);
 			Console.WriteLine(result);
 		}
 
@@ -78,7 +80,7 @@ namespace RequirementAnalysis
 			return GetAllGenerators(content, inheritance);
 		}
 
-		public static CoroutineInstanceType Compose(string filePath, List<Generator> generators, string[] interestedCoroutines = null, string[] lowPriorityCoroutines = null)
+		public static CoroutineInstanceType Compose(string remodelContent, List<string> functionOrder, List<Generator> generators, string[] interestedCoroutines = null, string[] lowPriorityCoroutines = null)
 		{
 			List<Generator> filtered;
 			if (interestedCoroutines != null)
@@ -111,7 +113,6 @@ namespace RequirementAnalysis
 
 
 			//store function names
-			List<string> modifiedValues = new List<string>();
 
 			Console.WriteLine("------Composition order:\n" + string.Join(" ---->\n", compositionOrder.Select(g =>
 			{
@@ -128,20 +129,21 @@ namespace RequirementAnalysis
 				if (p.Split("::").Length == 2)
 				{
 					// 将 p 的值写入到文件中，且去重
-					if (!modifiedValues.Contains(p))
+					if (!functionOrder.Contains(p))
 					{
 						string modifiedValue = p;
-						modifiedValues.Add(modifiedValue);
+						functionOrder.Add(modifiedValue);
 					}
 				}
 				return p;
 			})));
 
-			foreach (var value in modifiedValues)
+
+			string[] lines = remodelContent.Split("\n");
+
+			foreach (var value in functionOrder)
 			{
 				Console.WriteLine(value);
-
-				string[] lines = File.ReadAllLines(filePath);
 
 				for (int i = 0; i < lines.Length; i++)
 				{
@@ -149,8 +151,8 @@ namespace RequirementAnalysis
 					{
 						Console.WriteLine($"Field '{value}' found in line {i + 1}: {lines[i]}");
 
-						string content = ExtractParenthesesContent(lines[i]);
-						Console.WriteLine("^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + value + content);
+						string contentLine = ExtractParenthesesContent(lines[i]);
+						Console.WriteLine("^^^^^^^^^^^^^^^^^^^^^^^^^^^^" + value + contentLine);
 					}
 				}
 			}
