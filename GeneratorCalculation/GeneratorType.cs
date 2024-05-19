@@ -102,11 +102,32 @@ namespace GeneratorCalculation
 
 		public CoroutineInstanceType(Condition condition, PaperType receive, PaperType yield, PaperVariable source = null, bool canRestore = false)
 		{
-			Condition = condition;
 			Receive = receive;
 			Yield = yield;
 			Source = source;
 			CanRestore = canRestore;
+
+			if (condition is InheritanceCondition c1 && !receive.GetVariables().Contains(c1.Subclass))
+				Condition = null;
+			else
+				Condition = condition;
+
+
+		}
+
+		public CoroutineInstanceType(Condition condition, Dictionary<SequenceType, List<SequenceType>> forbiddenBindings, PaperType receive, PaperType yield, PaperVariable source = null, bool canRestore = false)
+		{
+			Receive = receive;
+			Yield = yield;
+			ForbiddenBindings = forbiddenBindings;
+			Source = source;
+			CanRestore = canRestore;
+
+			if (condition is InheritanceCondition c1 && !receive.GetVariables().Contains(c1.Subclass))
+				Condition = null;
+			else
+				Condition = condition;
+
 		}
 		/// <summary>
 		/// Check whether this generator can receive the given type.
