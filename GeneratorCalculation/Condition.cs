@@ -10,8 +10,9 @@ namespace GeneratorCalculation
 
 	public class InheritanceCondition : Condition
 	{
-		public PaperType Subclass { get; set; }
-		public PaperType Superclass { get; set; }
+		public PaperVariable Subclass { get; set; }
+
+		public ConcreteType Superclass { get; set; }
 
 		public override string ToString()
 		{
