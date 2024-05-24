@@ -309,6 +309,10 @@ namespace GeneratorCalculation
 		}
 	}
 
+	/// <summary>
+	/// Sequence cannot skip elements
+	/// A sequence can't nest another sequence
+	/// </summary>
 	public class SequenceType : PaperType
 	{
 		private static readonly ILogger logger = ApplicationLogging.LoggerFactory.CreateLogger(nameof(SequenceType));
@@ -468,6 +472,9 @@ namespace GeneratorCalculation
 		}
 	}
 
+	/// <summary>
+	/// tuple is a whole thing, cannot be splitted---the obvious difference with sequence
+	/// </summary>
 	public class TupleType : PaperType
 	{
 		public List<PaperType> Types { get; }

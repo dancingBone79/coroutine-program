@@ -131,9 +131,11 @@ namespace GeneratorCalculation
 		}
 		/// <summary>
 		/// Check whether this generator can receive the given type.
+		/// 
+		/// If it can receive, return 'condition'. If it cannot receive, return null.
 		/// </summary>
 		/// <param name="providedType"></param>
-		/// <param name="conditions"></param>
+		/// <param name="newGenerator"></param>
 		/// <returns></returns>
 		public virtual Dictionary<PaperVariable, PaperWord> RunReceive(PaperType providedType, out CoroutineInstanceType newGenerator)
 		{
