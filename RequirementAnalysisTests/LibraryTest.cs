@@ -35,11 +35,11 @@ namespace RequirementAnalysis.Tests
 				"ManageUserCRUDService::createStudent",
 				"LibraryManagementSystemSystem::makeReservation",
 				"LibraryManagementSystemSystem::borrowBook",
-				"LibraryManagementSystemSystem::returnBook",
 
 			};
 			string[] lowPriorityCoroutines =
 			{
+				"LibraryManagementSystemSystem::returnBook",
 				"ManageUserCRUDService::deleteUser",
 				"ManageBookCRUDService::deleteBook",
 				"ManageBookCopyCRUDService::deleteBookCopy",
